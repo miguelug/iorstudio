@@ -1,4 +1,5 @@
-# Instalar librerias de R studio:
+#1. Cambiar la ruta del csv, correspondiente a la dirección en la que este su clonación
+#2. Instalar librerias de R studio:
 gvlma
 fmsb
 VIF
