@@ -1,0 +1,67 @@
+---
+title: "Moidelo Econométrico"
+author: "Universidad Galileo"
+date: "1 de Abril, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options( warn = -1 )
+```
+
+## Venezuela explicando el ingreso familiar
+```{r dataset, echo=FALSE}
+#lectura del modelo, luego se despliega el contenido
+modelo <- read.csv(file="C:/Users/Miguel Barillas/Desktop/IO/modelov2.csv", header=TRUE, sep=",") 
+modelo
+```
+```{r cars2}
+library(gvlma)
+#se arma una regresion lineal
+regresion <- lm(formula = ING  ~ MI + GED + GSA, data =modelo)
+regresion
+#vemos varios de los resultados, los importantes son los estadisticos: t,F,R^2,R-ajustado
+summary(regresion)
+#plot de las graficas de relacion entre las variables
+car::scatterplotMatrix(modelo[1:4])
+#evaluacion de supuestos generales de la regresion
+gvlma(regresion)
+```
+##Evaluando Multicolinealidad:
+```{r echo=FALSE, results='show'}
+#To evaluate multicolinearity of multiple regression model, calculating the variance inflation factor (VIF) from the result of lm(). If VIF is more than 10, multicolinearity is strongly suggested.
+library(fmsb)
+library(VIF)
+library(scatterplot3d)
+s13d <- scatterplot3d(modelo, type="h", highlight.3d=TRUE, angle=55, scale.y=0.7, pch=16, main="MI ~ GED + GSA")
+s13d$plane3d(lm(MI ~ GED + GSA , modelo), lty.box = "solid")
+VIF(lm(formula = MI ~ GED + GSA, data =modelo))
+
+s23d <- scatterplot3d(modelo, type="h", highlight.3d=TRUE, angle=55, scale.y=0.7, pch=16, main="GED ~ MI + GSA")
+s23d$plane3d(lm(GED ~ MI + GSA, modelo), lty.box = "solid")
+VIF(lm(formula = GED ~ MI + GSA, data =modelo))
+
+s33d <- scatterplot3d(modelo, type="h", highlight.3d=TRUE, angle=55, scale.y=0.7, pch=16, main="GSA ~  MI + GED")
+s33d$plane3d(lm(GSA ~  MI + GED, modelo), lty.box = "solid")
+VIF(lm(formula = GSA ~  MI + GED, data =modelo))
+```
+##Multicolinealidad:
+```{r echo=FALSE, results='show',message=FALSE}
+library(car)
+vif(regresion)
+```
+##Evaluando Heterocedasticidad:
+```{r heterocedasticidad}
+library(ggplot2)
+lmtest::bptest(regresion)
+qqPlot(regresion, main="QQ Plot")#podemos ver graficamente la varianza
+```
+##Evaluando Autocorrelacion:
+```{r autocorrelacion}
+library(lmtest)
+acf(regresion$residuals)
+pacf(regresion$residuals)
+lawstat::runs.test(regresion$residuals,plot.it= TRUE)
+dwtest(regresion)
+```
